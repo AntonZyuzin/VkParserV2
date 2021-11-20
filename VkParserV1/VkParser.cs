@@ -21,17 +21,8 @@ namespace NetCore.Docker
 
         private string BuildUrl()
         {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.Append("https://api.vk.com/method/wall.get?domain=");
-            stringBuilder.Append(_group.GroupName);
-            stringBuilder.Append("&count=");
-            stringBuilder.Append(_group.CountOfPosts);
-            stringBuilder.Append("&access_token=");
-            stringBuilder.Append(_group.Token);
-            stringBuilder.Append("&v=5.81");
-            var stringUrl = stringBuilder.ToString();
-            //Console.WriteLine(stringUrl);
-            return stringUrl;
+            return
+                $"https://api.vk.com/method/wall.get?domain={_group.GroupName}&count={_group.CountOfPosts}&access_token={_group.Token}&v=5.81";
         }
 
         public async Task<string> GetJson()
@@ -67,7 +58,7 @@ namespace NetCore.Docker
                 if (jToken != null)
                 {
                     var text = (string) jToken["text"];
-                    if (text != null && !text.Equals(""))
+                    if(!string.IsNullOrEmpty(text))
                     {
                         str = (string) jToken["text"];
                     }

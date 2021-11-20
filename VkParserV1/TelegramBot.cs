@@ -14,8 +14,8 @@ namespace NetCore.Docker
             _chanelId = chanelId;
         }
 
-        private string _token { get; }
-        private string _chanelId { get; }
+        private string _token;
+        private string _chanelId;
 
         private string BuildUrl(string text)
         {

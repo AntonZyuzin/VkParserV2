@@ -44,6 +44,7 @@ namespace NetCore.Docker
             foreach (var item in list)
             {
                 bot.DoPost(item).GetAwaiter().GetResult();
+                System.Threading.Thread.Sleep(15 * 1000);
             }
         }
 

@@ -17,22 +17,15 @@ namespace NetCore.Docker
             var tgChannelId = ConfigurationManager.AppSettings.Get("tgChannelId");
             var tag = ConfigurationManager.AppSettings.Get("tag");
             var timer = Convert.ToInt32(ConfigurationManager.AppSettings.Get("timer"));
-            db.ListPosts = new List<Post>();
             var app = new Application(db, vkGroupName, vkCountOfPosts, vkToken, tgToken, tgChannelId, tag);
-            StartApp(db, app, timer);
-        }
-
-        private static void StartApp(Database db, Application app, int timer)
-        {
-            var t = Task.Run(async delegate
+            while (true)
             {
-                await Task.Delay(timer * 60 * 1000);
+                Console.WriteLine("начался обход");
                 app.Start();
-            });
-            t.Wait();
-            Console.WriteLine("сделан обход");
-            //StartApp(db, app, timer);
-            db.CleanList();
+                Console.WriteLine("сделан обход");
+                db.CleanList();
+                System.Threading.Thread.Sleep(timer * 60 * 1000);
+            }
         }
     }
 }

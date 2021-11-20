@@ -4,16 +4,12 @@ namespace NetCore.Docker
 {
     public class Database
     {
-        public List<Post> ListPosts;
-
+        public List<Post> ListPosts { get; } = new List<Post>();
         public void CleanList()
         {
             if (ListPosts.Count > 100)
-            {
-                for (var i = 0; i < 50; i++)
-                {
-                    ListPosts.Remove(ListPosts[i]);
-                }
+            { 
+                ListPosts.RemoveRange(0, 50);
             }
         }
     }
