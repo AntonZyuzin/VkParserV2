@@ -31,7 +31,7 @@ namespace NetCore.Docker
             });
             t.Wait();
             Console.WriteLine("сделан обход");
-            StartApp(db, app, timer);
+            //StartApp(db, app, timer);
             db.CleanList();
         }
     }
