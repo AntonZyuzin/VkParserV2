@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/antonzyuzin/Documents/Projects/C#/VkParserV2/VkParserV1/NetCore.Docker.csproj": {}
+  },
+  "projects": {
+    "/Users/antonzyuzin/Documents/Projects/C#/VkParserV2/VkParserV1/NetCore.Docker.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/antonzyuzin/Documents/Projects/C#/VkParserV2/VkParserV1/NetCore.Docker.csproj",
+        "projectName": "NetCore.Docker",
+        "projectPath": "/Users/antonzyuzin/Documents/Projects/C#/VkParserV2/VkParserV1/NetCore.Docker.csproj",
+        "packagesPath": "/Users/antonzyuzin/.nuget/packages/",
+        "outputPath": "/Users/antonzyuzin/Documents/Projects/C#/VkParserV2/VkParserV1/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/antonzyuzin/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/Users/antonzyuzin/.dotnet/sdk/5.0.402/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
