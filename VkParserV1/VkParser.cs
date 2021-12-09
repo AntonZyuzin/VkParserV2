@@ -11,15 +11,13 @@ namespace NetCore.Docker
 {
     public class VkParser
     {
-        private readonly Database _db;
-        private readonly string _filePath;
         private readonly VkGroup _group;
+        private readonly HttpClient _client;
 
-        public VkParser(VkGroup @group, Database db, string filePath)
+        public VkParser(VkGroup @group, HttpClient client)
         {
             _group = @group;
-            _db = db;
-            _filePath = filePath;
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         private string BuildUrl()
@@ -30,8 +28,7 @@ namespace NetCore.Docker
 
         public async Task<string> GetJson()
         {
-            var client = new HttpClient();
-            var request = await client.GetAsync(BuildUrl());
+            var request = await _client.GetAsync(BuildUrl());
             var jsonString = await request.Content.ReadAsStringAsync();
             return jsonString;
         }
@@ -61,7 +58,7 @@ namespace NetCore.Docker
                 if (jToken != null)
                 {
                     var text = (string) jToken["text"];
-                    if(!string.IsNullOrEmpty(text))
+                    if (!string.IsNullOrEmpty(text))
                     {
                         str = (string) jToken["text"];
                     }
@@ -73,7 +70,7 @@ namespace NetCore.Docker
                     str += "\n" + "" + "\n" + (string) jToken["text"];
                 }
 
-                listText.Add(HttpUtility.UrlEncode(str));
+                listText.Add(str);
                 str = "";
             }
 
@@ -99,7 +96,9 @@ namespace NetCore.Docker
                     if (jToken != null)
                     {
                         var listSizes = jToken["sizes"]!.ToList();
-                        listImages.Add($"<a href={(string) listSizes[^1]["url"]!}>&#8205;</a>");
+                        var imageUrl = (string) listSizes[^1]["url"]!;
+                        // listImages.Add($"[photo]({GetShortUrl(imageUrl).GetAwaiter().GetResult()})");
+                        listImages.Add(imageUrl);
                     }
                     else
                     {
@@ -111,35 +110,79 @@ namespace NetCore.Docker
             return listImages;
         }
 
-        public List<Post> SaveToPost(List<string> listId, List<string> listText, List<string> listImages)
+
+        public List<VkVideo> GetVideo(string jsonString)
         {
-            var listOfPosts = new List<Post>();
-            if (listOfPosts == null) throw new ArgumentNullException(nameof(listOfPosts));
-            if (listId == null || listText == null) return null;
-            listOfPosts.AddRange(listId.Select((t, index) =>
-                new Post(t, listText[index], listImages[index])));
-            return listOfPosts;
+            var listVideos = new List<VkVideo>();
+
+            for (var i = 0; i < _group.CountOfPosts; i++)
+            {
+                var jToken = JObject.Parse(jsonString)["response"]?["items"]?[i]?["attachments"]?[0]?["video"];
+                if (jToken != null)
+                {
+                    var info = GetVideoInfo(jToken).GetAwaiter().GetResult();
+                    var previewUrl = info[0];
+                    var videoUrl = info[1];
+                    listVideos.Add(new VkVideo(previewUrl, videoUrl));
+                }
+                else
+                {
+                    jToken =
+                        JObject.Parse(jsonString)["response"]?["items"]?[i]?["copy_history"]?[0]?["attachments"]?[0]?[
+                            "video"];
+                    if (jToken != null)
+                    {
+                        var info = GetVideoInfo(jToken).GetAwaiter().GetResult();
+                        var previewUrl = info[0];
+                        var videoUrl = info[1];
+                        listVideos.Add(new VkVideo(previewUrl, videoUrl));
+                    }
+                    else
+                    {
+                        listVideos.Add(new VkVideo("", ""));
+                    }
+                }
+            }
+            
+            return listVideos;
         }
 
-        public List<Post> SaveToPostWithFilter(List<string> listId, List<string> listText, List<string> listImages,
-            string tag)
+        private async Task<string[]> GetVideoInfo(JToken? jToken)
         {
-            var listPosts = new List<Post>();
-            if (listPosts == null) throw new ArgumentNullException(nameof(listPosts));
-            listPosts.AddRange(listId.Select((t, i) => new Post(t, listText[i], listImages[i]))
-                .Where((post, i) => listText[i].Contains(tag) && CompareIdInFile(post.Id)));
-            return listPosts;
+            var ownerId = (string) jToken["owner_id"]!;
+            var videoId = (string) jToken["id"]!;
+            var accessKey = (string) jToken["access_key"]!;
+            var previewUrl = (string) jToken["photo_1280"]!;
+            var requestVideoUrl =
+                $"https://api.vk.com/method/video.get?videos=" +
+                $"{ownerId}_" +
+                $"{videoId}_" +
+                $"{accessKey}" +
+                $"&access_token={HttpUtility.UrlEncode(_group.Token)}&v=5.81";
+            var request = await _client.GetAsync(requestVideoUrl);
+            var jsonString = await request.Content.ReadAsStringAsync();
+            jToken = JObject.Parse(jsonString)["response"]?["items"]?[0];
+            var videoUrl = (string) jToken?["player"]!;
+
+            string[] info = new string[]
+            {
+                previewUrl,
+                videoUrl
+            };
+
+            return info;
         }
 
-        private bool CompareIdInList(Post post)
+        private async Task<string> GetShortUrl(string url)
         {
-            return _db.ListPosts.All(item => !item.Id.Equals(post.Id));
-        }
-
-        private bool CompareIdInFile(string id)
-        {
-            string[] fileStrings = File.ReadAllLines(_filePath);
-            return !fileStrings.Contains(id);
+            var client = new HttpClient();
+            var requestUrl = "https://cutt.ly/scripts/shortenUrl.php";
+            var request = await client.PostAsync(requestUrl, new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string?, string?>("url", url),
+                new KeyValuePair<string?, string?>("domain", "0")
+            }));
+            return await request.Content.ReadAsStringAsync();
         }
     }
 }
